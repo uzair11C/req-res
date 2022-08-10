@@ -7,26 +7,30 @@ import {useRouter} from 'next/router'
 // import { fetchUsers } from '../actions/actions'
 import { AllUsers } from '../contexts/allUsersContext'
 import { CurrentUser } from '../contexts/currentUserContext'
-import Link from 'next/link'
+import axios from 'axios'
+import Backdrop from '@mui/material/Backdrop';
+import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
+import Fade from '@mui/material/Fade';
 
-const Login = () => 
+const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+    zIndex:99
+  };
+
+const SignUp = () => 
 {
-    const error =''
-    const {value1, value2} = useContext(AllUsers)
-
-    const [currentUser, setCurrentUser] = useContext(CurrentUser)
-
-    const [users1, setUsers1] = value1
-    const [users2, setUsers2] = value2
-
-    // const fetchUsers = useSelector((state) => state.fetchUsers)
-    // const dispatch = useDispatch();
-
-    // const users2 = dispatch(fetchUsers)
-    //console.log(allUsers)
-
-    const usersdata1 = users1
-    const usersdata2 = users2
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const router = useRouter()
 
@@ -52,28 +56,17 @@ const Login = () =>
         }
     )
 
-    const submitHandler = () =>
+    const submitHandler = async () =>
     {
-        usersdata1.map((user1)=>{ 
-            if(user1.email === formik.values.email) 
-            {
-                setCurrentUser({...user1, email: user1.email, first_name:user1.first_name,last_name:user1.last_name,avatar:user1.avatar})
-                router.push('/user')
-            }
-            })
-
-        usersdata2.map((user2)=>{
-            if(user2.email=== formik.values.email)
-            {
-                setCurrentUser({...user2, email: user2.email, first_name:user2.first_name,last_name:user2.last_name,avatar:user2.avatar})
-                router.push('/user')
-            }
-            else
-            {
-                error='Values did not match'
-                console.log('Values do not match')
-            }
-        })
+        handleOpen()
+        const res = await axios.post('https://reqres.in/api/register',
+                                {
+                                    name:   formik.values.name,
+                                    email: formik.values.email,
+                                    password: formik.values.password
+                                }            
+                        )
+        console.log(res)
     }
 
     console.log(formik.values)
@@ -82,10 +75,7 @@ const Login = () =>
             <Container maxWidth='lg' sx={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}>
                 <Paper sx={{width:'400px',height:'500px',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',padding:'20px',backgroundColor:'#878dfa'}}>
                     <Typography variant='h2' component='div' sx={{textAlign:'left',mb:'10px'}}>
-                        Login
-                    </Typography>
-                    <Typography variant='p' component='p' sx={{color:'red'}}>
-                        {error}
+                        Sign Up
                     </Typography>
                     <form onSubmit={formik.handleSubmit}>
                         <Stack spacing={3} >
@@ -121,9 +111,36 @@ const Login = () =>
                             <Button type='submit' variant='contained' sx={{mt:'10px'}} onSubmit={formik.handleSubmit}>
                                 Submit
                             </Button>
-                            <Typography>
-                                Don&#39;t have an account? <Link href='/sign-up'><Button variant='contained' color='success'>Sign-Up!</Button></Link>
-                            </Typography>
+                            <div>
+                                <Modal
+                                    aria-labelledby="transition-modal-title"
+                                    aria-describedby="transition-modal-description"
+                                    open={open}
+                                    onClose={handleClose}
+                                    closeAfterTransition
+                                    BackdropComponent={Backdrop}
+                                    BackdropProps={{
+                                    timeout: 500,
+                                    }}
+                                >
+                                    <Fade in={open}>
+                                    <Box sx={style}>
+                                        <Typography id="transition-modal-title" variant="h3" component="h2">
+                                            POST!
+                                        </Typography>
+                                        <Typography varaint='h5' component='p' id="transition-modal-description" sx={{ mt: 2 }}>
+                                            {formik.values.name}
+                                        </Typography>
+                                        <Typography varaint='h5' component='p' id="transition-modal-description" sx={{ mt: 2 }}>
+                                            {formik.values.email}
+                                        </Typography>
+                                        <Typography varaint='h5' component='p' id="transition-modal-description" sx={{ mt: 2 }}>
+                                            {formik.values.password}
+                                        </Typography>
+                                    </Box>
+                                    </Fade>
+                                </Modal>
+                                </div>
                         </Stack>
                     </form>
                 </Paper>
@@ -131,17 +148,4 @@ const Login = () =>
   )
 }
 
-export default Login
-
-// export const getStaticProps = async () =>
-// {
-
-//     const res = await fetch('https://reqres.in/api/users?page=1')
-//     const users = await res.json()
-
-//     return{
-//         props:{
-//             users
-//         }
-//     }
-// }
+export default SignUp

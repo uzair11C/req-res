@@ -33,18 +33,3 @@ export const AllUsersContext = ({ children }) =>
         </AllUsers.Provider>
     )
 }
-
-// export const getStaticProps = async () =>
-// {
-//     // const urls = ['https://reqres.in/api/users?page=1','https://reqres.in/api/users?page=2']
-
-//     // const ress = await Promise.all(urls.map((url) => (axios.get(url))))
-//     // const users = await Promise.all(ress.map((res) => (res.json())))
-
-//     const res = await axios.get('https://reqres.in/api/users?page=1')
-//     const users = await res.json()
-
-//     return{
-//         props: users
-//     }
-// }
