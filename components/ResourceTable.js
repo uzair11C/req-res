@@ -83,33 +83,12 @@ function createData(id, name, year, color, pantone_value) {
   return { id, name, year, color, pantone_value };
 }
 
-const rows = [
-  createData('Cupcake', 305, 3.7),
-  createData('Donut', 452, 25.0),
-  createData('Eclair', 262, 16.0),
-  createData('Frozen yoghurt', 159, 6.0),
-  createData('Gingerbread', 356, 16.0),
-  createData('Honeycomb', 408, 3.2),
-  createData('Ice cream sandwich', 237, 9.0),
-  createData('Jelly Bean', 375, 0.0),
-  createData('KitKat', 518, 26.0),
-  createData('Lollipop', 392, 0.2),
-  createData('Marshmallow', 318, 0),
-  createData('Nougat', 360, 19.0),
-  createData('Oreo', 437, 18.0),
-].sort((a, b) => (a.calories < b.calories ? -1 : 1));
-
-export default function CustomPaginationActionsTable({ resource1, resource2 }) {
+export default function CustomPaginationActionsTable() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  //const resources = [...resource1.data, ...resource2.data]
-
-  // console.log(resource1)
-
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -120,29 +99,70 @@ export default function CustomPaginationActionsTable({ resource1, resource2 }) {
     setPage(0);
   };
 
-  React.useEffect(()=>{
-    axios.get('https://reqres.in/api/unknown', {
+  const [resource1, setResource1] = React.useState([])
+  const [resource2, setResource2] = React.useState([])
+
+  const fetchResource1 = async () =>
+  {
+    const res = await axios.get('https://reqres.in/api/unknown', {
       params: {
         page: '1',
       }
     })
-    .then(function (response) {
-      console.log(response.data.data);
+
+    setResource1(res.data.data)
+  }
+
+  const fetchResource2 = async () =>
+  {
+    const res = await axios.get('https://reqres.in/api/unknown', {
+      params: {
+        page: '2',
+      }
     })
+    setResource2(res.data.data)
+  }
+
+  React.useEffect(()=>
+  {
+    fetchResource1()
+    fetchResource2()
   },[])
 
 
+  const resources = [...resource1, ...resource2]
+
+  console.log(resources.map(res=>(res.name)))
+
+  const rows = resources.map(resource =>(
+    createData(resource.id, resource.name, resource.year,resource.color,resource.pantone_value))
+    // createData('Donut', 452, 25.0),
+    // createData('Eclair', 262, 16.0),
+    // createData('Frozen yoghurt', 159, 6.0),
+    // createData('Gingerbread', 356, 16.0),
+    // createData('Honeycomb', 408, 3.2),
+    // createData('Ice cream sandwich', 237, 9.0),
+    // createData('Jelly Bean', 375, 0.0),
+    // createData('KitKat', 518, 26.0),
+    // createData('Lollipop', 392, 0.2),
+    // createData('Marshmallow', 318, 0),
+    // createData('Nougat', 360, 19.0),
+    // createData('Oreo', 437, 18.0),
+    ).sort((a, b) => (a.calories < b.calories ? -1 : 1));
+
+    const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - resources.length) : 0;
 
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
         <TableHead>
             <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Name</TableCell>
+                <TableCell sx={{fontWeight:'bold'}}>ID</TableCell>
+                <TableCell sx={{fontWeight:'bold',textAlign:'center'}}>Name</TableCell>
+                <TableCell sx={{fontWeight:'bold',textAlign:'center'}}>Year</TableCell>
+                <TableCell sx={{fontWeight:'bold',textAlign:'center'}}>Color</TableCell>
+                <TableCell sx={{fontWeight:'bold',textAlign:'center'}}>Pantone Value</TableCell>
             </TableRow>
         </TableHead>
         <TableBody>
@@ -150,7 +170,7 @@ export default function CustomPaginationActionsTable({ resource1, resource2 }) {
             ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             : rows
           ).map((row) => (
-            <TableRow key={row.name}>
+            <TableRow key={row.id}>
               <TableCell component="th" scope="row">
                 {row.id}
               </TableCell>
@@ -160,7 +180,7 @@ export default function CustomPaginationActionsTable({ resource1, resource2 }) {
               <TableCell style={{ width: 160 }} align="right">
                 {row.year}
               </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
+              <TableCell style={{ width: 160, background:row.color }} align="right">
                 {row.color}
               </TableCell>
               <TableCell style={{ width: 160 }} align="right">
